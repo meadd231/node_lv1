@@ -2,62 +2,61 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 
-const multer = require('multer');
-const upload = multer();
-
 const router = express.Router();
 router.use(bodyParser.json())
 router.use(bodyParser.raw());
 router.use(bodyParser.text());
 router.use(bodyParser.urlencoded({ extended: true }));
-
-const connect = require('../schemas');
-connect();
 const Comment = require('../schemas/comment');
 
-router.post('/', upload.none(), async (req, res) => {
-    const { post_id, comment_writer, comment_password, comment_content } = req.body;
+router.post('/:postId/comments', async (req, res) => {
+    const postId = req.params.postId;
+    const { comment_writer, comment_password, comment_content } = req.body;
     const comment = new Comment({
-        post_id: post_id,
+        post_id: postId,
         writer: comment_writer,
         password: comment_password,
         content: comment_content
     });
     try {
         await comment.save();
-        res.json({ msg: '성공' });
+        res.json({ msg: '댓글을 생성하였습니다.' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: '에러 발생' });
     }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:postId/comments', async (req, res) => {
+    console.log(req.params);
+    const postId = req.params.postId;
+    console.log(postId);
     try {
-        const comments = await Comment.find({post_id:req.params.id});
-        res.json(comments);
+        const comments = await Comment.find({post_id:postId});
+        res.json({"data" : comments});
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: '에러 발생' });
     }
 });
 
-router.put('/', async (req, res) => {
-    const { comment_id, comment_writer, comment_password, comment_content } = req.body;
+router.put('/:postId/comments/:commentId', async (req, res) => {
+    const commentId = req.params.commentId;
+    const { comment_writer, comment_password, comment_content } = req.body;
     try {
-        await Comment.updateOne({_id: comment_id}, {$set: {'writer':comment_writer, 'password':comment_password, 'content':comment_content}});
-        res.json({'msg' : '수정 완료'});
+        await Comment.updateOne({_id: commentId}, {$set: {'writer':comment_writer, 'password':comment_password, 'content':comment_content}});
+        res.json({'msg' : '댓글을 수정하였습니다.'});
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: '에러 발생' });
     }
 });
 
-router.delete('/', async (req, res) => {
-    const { comment_id } = req.body;
+router.delete('/:postId/comments/:commentId', async (req, res) => {
+    const commentId = req.params.commentId;
     try {
-        await Comment.deleteOne({_id: comment_id});
-        res.json({'msg' : '삭제 완료'});
+        await Comment.deleteOne({_id: commentId});
+        res.json({'msg' : '댓글을 삭제하였습니다.'});
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: '에러 발생' });
