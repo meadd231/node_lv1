@@ -6,7 +6,9 @@ const router = express.Router();
 // 회원가입
 router.post("/signup", async (req, res) => {
 	try {
+        console.log(req.body);
 		const { nickname, password, confirm } = req.body;
+        console.log(nickname, password, confirm);
 		// 닉네임 형식 검사
 		const nicknameRegex = /^[a-zA-Z0-9]{3,}$/;
 		if (!nicknameRegex.test(nickname)) {
@@ -30,9 +32,8 @@ router.post("/signup", async (req, res) => {
 		}
 
 		const userTest = await User.findOne({ nickname }).exec();
-
 		// 중복된 닉네임인지 검사
-		if (userTest.nickname === nickname) {
+		if (userTest) {
 			return res.status(412).json({ errorMessage: '중복된 닉네임입니다.' });
 		}
 
