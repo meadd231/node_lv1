@@ -30,7 +30,7 @@ router.post('/:postId/comments', authMiddleware, async (req, res) => {
 router.get('/:postId/comments', async (req, res) => {
 	try {
 		const postId = req.params.postId;
-		const post = await Post.findOne({ _id: postId });
+		const post = await Post.find({ _id: postId }).sort("-createdAt").exec();
 
 		if (!post) {
 			res.status(404).json({ errorMessage: "게시글이 존재하지 않습니다." });
@@ -46,11 +46,13 @@ router.get('/:postId/comments', async (req, res) => {
 
 router.put('/:postId/comments/:commentId', authMiddleware, async (req, res) => {
 	try {
-		const postId = req.params.postId;
-		const commentId = req.params.commentId;
+		console.log(req.params);
+		const { postId, commentId } = req.params;
+		console.log(postId, commentId);
+		// const postId = req.params.postId;
+		// const commentId = req.params.commentId;
 		const user = res.locals.user;
 		const { comment } = req.body;
-
 		if (!comment) {
 			res.status(412).json({ errorMessage: "데이터 형식이 올바르지 않습니다." });
 		}

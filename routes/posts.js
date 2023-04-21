@@ -7,7 +7,7 @@ router.post('/', authMiddleware, async (req, res) => {
   try {
     const { title, content } = req.body;
     if (!title || !content) {
-      res.status(412).json({ errorMessage: "데이터의 형식이 올바르지 않습니다." });
+      res.status(412).json({ errorMessage: '데이터의 형식이 올바르지 않습니다.' });
     }
     const user = res.locals.user;
     const posting = new Post({ userId: user._id, nickname: user.nickname, title, content });
@@ -37,7 +37,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const posts = await Post.find();
+    const posts = await Post.find().sort("-createdAt").exec();
     res.status(200).json({ "posts": posts });
   } catch (error) {
     console.error(error);
@@ -72,7 +72,10 @@ router.put('/:postId', authMiddleware, async (req, res) => {
 
     // userId는 String이고 user._id는 ObjectId라서 === 이러면 false라고 나오는 것 같음.
     if (post.userId == user._id) {
-      await Post.updateOne({ _id: postId }, { $set: { title, content, updatedAt: Date.now() } });
+      const updated = await Post.updateOne({ _id: postId }, { $set: { title, content, updatedAt: Date.now() } });
+      if (!updated) {
+        // 제대로 수정 안 된 경우
+      }
       res.status(200).json({ message: '게시글을 수정하였습니다.' });
     } else {
       res.status(403).json({ errorMessage: "게시글의 수정 권한이 존재하지 않습니다." });
@@ -101,7 +104,7 @@ router.delete('/:postId', authMiddleware, async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ errorMessage: "게시글 삭제에 실패하였습니다." });
+    res.status(400).json({ errorMessage: "게시글 삭제에 실패하였습니다." });
   }
 });
 

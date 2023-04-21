@@ -20,6 +20,7 @@ module.exports = async (req, res, next) => {
   try {
     // 1. authToken이 만료되었는지 확인
     // 2. authToken이 서버가 발급한 토큰이 맞는지 확인
+    // 여기에서 제대로 안 됐을 때 어떤 에러가 발생할지 궁금하기는 함.
     const { userId } = jwt.verify(authToken, "secret_key_hh_node_js");
     // 3. authToken에 있는 userId에 해당하는 사용자가 실제 DB에 존재하는지 확인
     const user = await User.findOne({ _id: userId });
